@@ -12,11 +12,9 @@
 
 ## 1. Objective
 
-The objective of this practical was to set up and operate a local Kubernetes environment using **kind**, and to gain practical experience with the core Kubernetes objects and `kubectl` operations used to deploy and manage workloads.
+The objective of this practical was to set up and operate a local Kubernetes environment using **kind** and to gain practical experience with the core Kubernetes objects.
 
-The practical involved creating a three-node Kubernetes cluster consisting of one control-plane node and two worker nodes. After creating the cluster, I inspected the Kubernetes control-plane components, created a namespace with resource controls, deployed an Nginx web application using both imperative and declarative approaches, and managed the application through Pods, Deployments, ReplicaSets, and Services.
-
-I also practised Kubernetes troubleshooting by examining Pod events and logs, entering a running container, forwarding a local port, testing Service discovery, performing scaling and rolling updates, deliberately causing a failed image rollout, and recovering the application through rollback. Finally, I verified that the configuration was reproducible from the repository manifests and cleaned up the cluster.
+The practical involved creating a three node Kubernetes cluster consisting of one control-plane node and two worker nodes. After creating the cluster, I inspected the Kubernetes control-plane components, created a namespace with resource controls, deployed an Nginx web application using both imperative and declarative approaches and managed the application through Pods, Deployments, ReplicaSets and Services.
 
 The practical addresses the following learning outcomes:
 
@@ -24,8 +22,6 @@ The practical addresses the following learning outcomes:
 - **LO2:** Deploy and manage applications on a Kubernetes cluster using different resource types.
 - **LO3:** Operate the Kubernetes CLI (`kubectl`) for cluster management and troubleshooting.
 - **LO5 (part):** Apply namespace-based multi-tenancy concepts.
-
-The practical guide identifies the covered Unit I areas as 1.1, 1.2.1–1.2.4, 1.3.1–1.3.3, 1.4.1, 1.5.1 and 1.5.3.
 
 ## 2. Environment
 
@@ -63,8 +59,7 @@ kubectl version --client
 
 All required tools were available and responding correctly. This confirmed that the environment was ready for creating the Kubernetes cluster.
 
-> **Screenshot Placeholder — Environment Verification**  
-> Add the screenshot showing the Docker, kind and kubectl version/verification commands from `evidence/`.
+![environment verification](/dso202-practical-01/evidence/environmentVerification-stage0.png)
 
 ## 3.2 Stage 1 — Creating the Three-Node Cluster
 
@@ -75,6 +70,7 @@ The cluster configuration was stored in:
 ```text
 cluster/kind-cluster.yaml
 ```
+![cluster creation](/dso202-practical-01/evidence/creatingCluster-stage1.png)
 
 ### Commands used
 
@@ -102,11 +98,11 @@ The kubectl context was automatically changed to:
 ```text
 kind-dso202
 ```
+![cluster creation](/dso202-practical-01/evidence/2-stage1.png)
 
 This demonstrated that kind runs Kubernetes nodes as containers while Kubernetes exposes them as Node objects to the cluster.
 
-> **Screenshot Placeholder — Stage 1: Cluster Creation**  
-> Insert the screenshot showing `kind get clusters`, `kind get nodes`, `docker ps`, and the current kubectl context.
+![cluster creation](/dso202-practical-01/evidence/1-stage1.png)
 
 ## 3.3 Stage 2 — Inspecting the Cluster and Its Components
 
@@ -142,23 +138,19 @@ The node description also showed labels, capacity, allocatable resources and the
 
 This stage helped connect the theoretical Kubernetes architecture with the actual objects and Pods running in the cluster.
 
-> **Screenshot Placeholder — Stage 2: Nodes**  
-> Insert the screenshot showing `kubectl get nodes -o wide`.
+![nodes](/dso202-practical-01/evidence/nodes-stage2.png)
 
-> **Screenshot Placeholder — Stage 2: Kubernetes Components**  
-> Insert the screenshot showing `kubectl get pods -n kube-system -o wide`.
+![kubernetes component](/dso202-practical-01/evidence/kubernetesComponent-stage2.png) 
 
 ## 3.4 Stage 3 — Namespace, ResourceQuota and LimitRange
 
 I have created the namespace imperatively first to see the imperative form, then deleted it.
 
-> **Screenshot Placeholder — Stage 3: imperative first**  
-> Insert the screenshot showing `kubectl get pods -n kube-system -o wide`
+![imperative](/dso202-practical-01/evidence/imperativeFirst-stage3.png)
 
 Generated a manifest from an imperative command without executing it.
 
-> **Screenshot Placeholder — Stage 3: manifest**  
-> Insert the screenshot showing `kubectl get pods -n kube-system -o wide`
+![manisfest](/dso202-practical-01/evidence/manifet-stage3.png)
 
 I created a dedicated namespace named `dso202-practical` to isolate the resources used in this practical.
 
@@ -167,12 +159,14 @@ The namespace configuration was stored in:
 ```text
 manifests/00-namespace.yaml
 ```
+![namespace](/dso202-practical-01/evidence/listing20stage3.png)
 
 I then applied a ResourceQuota and LimitRange from:
 
 ```text
 manifests/01-quota-and-limits.yaml
 ```
+![namespace](/dso202-practical-01/evidence/listing3stage3.png)
 
 ### Commands used
 
@@ -202,6 +196,8 @@ kubectl get pod limitrange-check -o jsonpath='{.spec.containers[0].resources}'
 
 The resulting resource configuration showed that default values had been automatically injected.
 
+![temporary](/dso202-practical-01/evidence/temporary-Stage3.png)
+
 The temporary Pod was then removed:
 
 ```bash
@@ -209,12 +205,6 @@ kubectl delete pod limitrange-check
 ```
 
 This demonstrated how ResourceQuota and LimitRange work together to control resource usage in a namespace.
-
-> **Screenshot Placeholder — Stage 3: Namespace**  
-> Insert the screenshot showing the namespace creation and current namespace.
-
-> **Screenshot Placeholder — Stage 3: ResourceQuota and LimitRange**  
-> Insert the screenshot showing `kubectl describe resourcequota` and `kubectl describe limitrange`.
 
 ## 3.5 Stage 4 — Pods
 
