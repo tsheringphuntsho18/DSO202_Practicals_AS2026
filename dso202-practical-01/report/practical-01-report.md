@@ -217,13 +217,14 @@ kubectl run web-imperative \
   --image=nginx:1.30-alpine \
   --restart=Never \
   --port=80 \
-  --labels='app=web,tier=frontend,managed-by=imperative'
+  --labels='app=web,tier=frontend,managed-by=imperative' --namespace dso202-practical-01
 ```
 
 I verified that the Pod reached the `Running` state and captured its stored YAML:
 
 ```bash
-kubectl get pod web-imperative --watch
+kubectl get pod web-imperative --watch --namespace dso202-practical-01
+
 kubectl get pod web-imperative -o yaml > evidence/web-imperative-as-stored.yaml
 ```
 
@@ -232,6 +233,7 @@ The Pod was then deleted:
 ```bash
 kubectl delete pod web-imperative
 ```
+![imperative](/dso202-practical-01/evidence/imperativeRoute-Stage4.png)
 
 ### 3.5.2 Declarative Pod
 
@@ -252,18 +254,21 @@ Applying the same manifest again produced an `unchanged` result, demonstrating d
 ```bash
 kubectl apply -f manifests/02-pod-web.yaml
 ```
+![declarative](/dso202-practical-01/evidence/declarative-stage4.png)
 
 ### 3.5.3 Labels and Selectors
 
 I inspected and queried the Pod using labels:
 
 ```bash
-kubectl get pods --show-labels
+kubectl get pod web-pod -o wide --show-labels
 kubectl get pods -l app=web
-kubectl get pods -l tier=frontend,managed-by=declarative
+kubectl get pods -l tier=frontend,dso202/managed-by=declarative
 ```
 
 I also added and removed a label at runtime and added an annotation.
+
+![labels](/dso202-practical-01/evidence/labels-stage4.png)
 
 ### 3.5.4 Troubleshooting and Container Access
 
@@ -283,28 +288,19 @@ I also used port forwarding:
 ```bash
 kubectl port-forward pod/web-pod 8080:80
 ```
+![portForward](/dso202-practical-01/evidence/port-forwarding-stage4.png)
 
-and tested the web server from the host:
+Leaving that command running, in a second terminal I tested the web server from the host:
 
 ```bash
 curl -s http://localhost:8080
 ```
+![curl](/dso202-practical-01/evidence/curl-tested-stage4.png)
 
 ### Observation
 
 The Pod reached the `Running` state and successfully served the default Nginx web page. The `describe` output showed the scheduling and container startup events. The exercise also demonstrated that Pod IP addresses are cluster-internal and that port forwarding can be used for temporary debugging access.
 
-> **Screenshot Placeholder — Stage 4: Pod Running**  
-> Insert the screenshot showing `kubectl get pod web-pod -o wide`.
-
-> **Screenshot Placeholder — Stage 4: Labels**  
-> Insert the screenshot showing `kubectl get pods --show-labels` and label selection.
-
-> **Screenshot Placeholder — Stage 4: Logs / Exec**  
-> Insert the screenshot showing `kubectl logs`, `kubectl exec`, or the Nginx version.
-
-> **Screenshot Placeholder — Stage 4: Port Forward**  
-> Insert the screenshot showing port forwarding and the successful `curl` response.
 
 ## 3.6 Stage 5 — Deployments
 
