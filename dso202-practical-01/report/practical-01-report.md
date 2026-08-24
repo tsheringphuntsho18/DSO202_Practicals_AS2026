@@ -712,15 +712,15 @@ The practical also demonstrated that manual imperative changes, such as scaling 
 
 # 5. Reflection
 
-## 5.1 Difficulties Encountered
+## Difficulties Encountered
 
 The most challenging part of the practical was understanding the relationship between Kubernetes objects and the actions performed by different controllers. Initially, it was easy to think of a Deployment as simply another way of creating Pods. However, observing the Deployment → ReplicaSet → Pod relationship made the controller model much clearer.
 
 Another important learning point was understanding the difference between Pod networking and Service networking. A Pod IP may work inside the cluster but should not be treated as a permanent address. Using a Service and DNS name provides a more reliable communication mechanism.
 
-The rolling-update exercise was also useful because it showed that an application can be deliberately given an invalid image without immediately destroying the healthy application replicas.
+The rolling update exercise was also useful because it showed that an application can be deliberately given an invalid image without immediately destroying the healthy application replicas.
 
-## 5.2 Error Diagnosis
+## Error Diagnosis
 
 During the failed rollout exercise, the Deployment was deliberately changed to a nonexistent image:
 
@@ -742,32 +742,22 @@ The diagnostic process was:
 
 This showed that Kubernetes troubleshooting should begin with the current resource state and event history rather than immediately changing configuration.
 
-## 5.3 What I Would Do Differently
+## What I Would Do Differently
 
 If I repeated the practical, I would capture evidence immediately after every important checkpoint instead of collecting screenshots near the end. I would also keep a short command log while working so that the final report could be prepared more quickly.
 
 I would additionally use `kubectl diff` before applying important manifest changes to compare the intended configuration with the current cluster state.
 
-## 5.4 Remaining Area for Improvement
+## Remaining Area for Improvement
 
-One area I still need to understand more deeply is how Kubernetes networking is implemented internally between Services, EndpointSlices, kube-proxy and the container network. The practical demonstrated the behaviour successfully, but the exact packet-processing path would benefit from further investigation in later networking and service-mesh practicals.
+One area I still need to understand more deeply is how Kubernetes networking is implemented internally between Services, EndpointSlices, kube-proxy and the container network. The practical demonstrated the behaviour successfully, but the exact packet processing path would benefit from further investigation in later networking and service mesh practicals.
 
-# 6. Conclusion
-
-This practical provided a complete introduction to operating a local Kubernetes cluster using kind and kubectl. I successfully created a three-node cluster, inspected its architecture, configured namespace-level resource controls, deployed an Nginx workload, and managed it using Pods, Deployments, ReplicaSets and Services.
-
-The practical also demonstrated important Kubernetes operational concepts including declarative configuration, scheduling, labels and selectors, self-healing, scaling, rolling updates, rollback, Service discovery, NodePort access and troubleshooting.
-
-The failed rollout exercise was particularly useful because it demonstrated how Kubernetes protects healthy replicas during an unsuccessful update and how an administrator can diagnose and recover from the problem.
-
-Finally, rebuilding the workload from the repository manifests demonstrated that the practical configuration was reproducible and not dependent solely on the original local cluster.
-
-# 7. References
+# 6. References
 
 The following documentation and practical guide were used while completing the practical.
 
 1. **DSO202 Practical 1 Guide — Setting Up a Local Kubernetes Cluster with kind and Deploying First Workloads.** Accessed: 16 August 2026.
 2. **Kubernetes Documentation — kubectl documentation and Kubernetes concepts.** Accessed: 16 August 2026.
-3. **kind Documentation — Kubernetes IN Docker.** Accessed: 16 August 2026.
-4. **Docker Documentation — Docker Engine.** Accessed: 16 August 2026.
+3. **menifest file** Accessed: 16 August 2026.
+
 
