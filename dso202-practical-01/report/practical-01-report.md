@@ -537,7 +537,7 @@ The Service exercises demonstrated the difference between ClusterIP and NodePort
 
 ## 3.8 Stage 7 — Cleanup and Reproducibility
 
-Before deleting the cluster, I captured the final state of the Kubernetes resources and events.
+Before deleting the cluster, I captured the final state of the Kubernetes resources and events. Stored in evidence directory.
 
 ### Commands used
 
@@ -547,6 +547,7 @@ kubectl get resourcequota,limitrange,endpointslice -o wide >> evidence/final-sta
 kubectl get nodes -o wide > evidence/final-state-nodes.txt
 kubectl get events --sort-by=.lastTimestamp > evidence/final-state-events.txt
 ```
+![stored](/dso202-practical-01/evidence/stored-stage7.png) 
 
 The workload objects were then removed using their original manifests:
 
@@ -563,6 +564,7 @@ I verified that the namespace no longer contained workload resources:
 ```bash
 kubectl get all
 ```
+![deleted](/dso202-practical-01/evidence/deleted-stage7.png)
 
 The configuration was then rebuilt from the repository:
 
@@ -570,6 +572,7 @@ The configuration was then rebuilt from the repository:
 kubectl apply -f manifests/
 kubectl get all
 ```
+![rebuilt](/dso202-practical-01/evidence/rebuilt-stage7.png)
 
 This confirmed that the practical could be recreated from the stored manifests.
 
@@ -582,16 +585,11 @@ kind delete cluster --name dso202
 kind get clusters
 docker ps
 ```
+![reset](/dso202-practical-01/evidence/reset-stage7.png)
 
 ### Observation
 
 The cluster was successfully deleted, demonstrating that the practical configuration was stored in the repository rather than depending on the local cluster state. Reapplying the manifests recreated the Kubernetes workload objects, demonstrating reproducibility.
-
-> **Screenshot Placeholder — Stage 7: Reproducibility**  
-> Insert the screenshot showing `kubectl apply -f manifests/` recreating the resources.
-
-> **Screenshot Placeholder — Stage 7: Cleanup**  
-> Insert the screenshot showing the cluster deletion and `kind get clusters` reporting no remaining clusters.
 
 # 4. Analysis
 

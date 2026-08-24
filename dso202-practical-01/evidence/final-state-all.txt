@@ -1,0 +1,28 @@
+NAME                                  READY   STATUS    RESTARTS   AGE     IP           NODE            NOMINATED NODE   READINESS GATES
+pod/client-pod                        1/1     Running   0          32m     10.244.2.8   worker-node-2   <none>           <none>
+pod/limitrange-check                  0/1     Unknown   0          4d5h    <none>       worker-node-2   <none>           <none>
+pod/web-deployment-76ddf5fcf9-9xvqg   1/1     Running   0          117m    10.244.1.9   worker-node-1   <none>           <none>
+pod/web-deployment-76ddf5fcf9-mkrhs   1/1     Running   0          117m    10.244.1.8   worker-node-1   <none>           <none>
+pod/web-deployment-76ddf5fcf9-v649p   1/1     Running   0          117m    10.244.2.6   worker-node-2   <none>           <none>
+pod/web-pod                           1/1     Running   0          3h23m   10.244.2.2   worker-node-2   <none>           <none>
+
+NAME                    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE   SELECTOR
+service/web-clusterip   ClusterIP   10.96.246.230   <none>        80/TCP         37m   app=web,tier=frontend
+service/web-nodeport    NodePort    10.96.242.124   <none>        80:30080/TCP   12m   app=web,tier=frontend
+
+NAME                             READY   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS   IMAGES              SELECTOR
+deployment.apps/web-deployment   3/3     3            3           149m   web          nginx:1.30-alpine   app=web,tier=frontend
+
+NAME                                        DESIRED   CURRENT   READY   AGE    CONTAINERS   IMAGES                      SELECTOR
+replicaset.apps/web-deployment-67499b7844   0         0         0       114m   web          nginx:9.99-does-not-exist   app=web,pod-template-hash=67499b7844,tier=frontend
+replicaset.apps/web-deployment-76ddf5fcf9   3         3         3       149m   web          nginx:1.30-alpine           app=web,pod-template-hash=76ddf5fcf9,tier=frontend
+replicaset.apps/web-deployment-ddd46bfd     0         0         0       125m   web          nginx:1.31-alpine           app=web,pod-template-hash=ddd46bfd,tier=frontend
+NAME                         REQUEST                                                                                                                          LIMIT                                          AGE
+resourcequota/dso202-quota   count/configmaps: 1/10, count/secrets: 0/10, count/services: 2/5, pods: 5/20, requests.cpu: 225m/2, requests.memory: 288Mi/2Gi   limits.cpu: 900m/4, limits.memory: 576Mi/4Gi   4d6h
+
+NAME                       CREATED AT
+limitrange/dso202-limits   2026-08-20T04:36:34Z
+
+NAME                                                 ADDRESSTYPE   PORTS   ENDPOINTS                                      AGE
+endpointslice.discovery.k8s.io/web-clusterip-ccnl5   IPv4          80      10.244.1.8,10.244.2.2,10.244.1.9 + 1 more...   38m
+endpointslice.discovery.k8s.io/web-nodeport-fsfjh    IPv4          80      10.244.1.8,10.244.2.6,10.244.2.2 + 1 more...   13m

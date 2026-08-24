@@ -1,0 +1,6 @@
+LAST SEEN   TYPE     REASON      OBJECT           MESSAGE
+33m         Normal   Scheduled   pod/client-pod   Successfully assigned dso202-practical-01/client-pod to worker-node-2
+33m         Normal   Pulling     pod/client-pod   Pulling image "busybox:1.37"
+33m         Normal   Pulled      pod/client-pod   Successfully pulled image "busybox:1.37" in 18.533s (18.533s including waiting). Image size: 2222111 bytes.
+33m         Normal   Created     pod/client-pod   Container created
+33m         Normal   Started     pod/client-pod   Container started
