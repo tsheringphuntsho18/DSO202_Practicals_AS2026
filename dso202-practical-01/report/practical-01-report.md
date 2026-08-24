@@ -299,7 +299,7 @@ curl -s http://localhost:8080
 
 ### Observation
 
-The Pod reached the `Running` state and successfully served the default Nginx web page. The `describe` output showed the scheduling and container startup events. The exercise also demonstrated that Pod IP addresses are cluster-internal and that port forwarding can be used for temporary debugging access.
+The Pod reached the `Running` state and successfully served the default Nginx web page. The `describe` output showed the scheduling and container startup events. The exercise also demonstrated that Pod IP addresses are cluster internal and that port forwarding can be used for temporary debugging access.
 
 
 ## 3.6 Stage 5 — Deployments
@@ -320,6 +320,7 @@ kubectl rollout status deployment/web-deployment
 
 kubectl get deployment,replicaset,pod -l app=web
 ```
+![deployment](/dso202-practical-01/evidence/deployment-stage5.png)
 
 ### Observation
 
@@ -346,23 +347,36 @@ victim=$(kubectl get pods -l app=web -o jsonpath='{.items[0].metadata.name}')
 kubectl delete pod "$victim"
 kubectl get pods -l app=web
 ```
+![self-healing](/dso202-practical-01/evidence/self-healing-stage5.png)
 
 A replacement Pod was automatically created by the ReplicaSet.
 
 ### Scaling
 
-I scaled the Deployment to five replicas:
+I scaled the Deployment to five replicas imperatively:
 
 ```bash
 kubectl scale deployment web-deployment --replicas=5
 kubectl get deployment web-deployment
 ```
+I then return to three replicas the declarative way by applying the manifest again.
 
-I then restored the declared three-replica configuration by applying the manifest again.
+```bash
+kubectl apply -f manifests/03-deployment-web.yaml
+kubectl get deployment web-deployment
+```
+![imperative scaling](/dso202-practical-01/evidence/scaling-stage5.png)
 
 ### Rolling Update
 
-I changed the Nginx image to a newer version:
+I changed the Nginx image to a newer version. Watch the rollout in a second terminal:
+
+```bash
+kubectl get pods -l app=web --watch
+```
+![watch](/dso202-practical-01/evidence/beforeUpdate-stage5.png)
+
+I changed the image version to `nginx:1.31-alpine` from `nginx:1.30-alpine`(current used).
 
 ```bash
 kubectl set image deployment/web-deployment web=nginx:1.31-alpine
@@ -370,8 +384,11 @@ kubectl annotate deployment web-deployment \
   kubernetes.io/change-cause="upgrade nginx from 1.30-alpine to 1.31-alpine"
 kubectl rollout status deployment/web-deployment
 ```
+![version](/dso202-practical-01/evidence/versionchanged-stage5.png)
 
 The Deployment created a new ReplicaSet and gradually replaced the old Pods.
+
+![rollout](/dso202-practical-01/evidence/afterrollout-stage5.png)
 
 ### Rollback
 
@@ -386,7 +403,9 @@ and rolled back to the previous version:
 ```bash
 kubectl rollout undo deployment/web-deployment
 kubectl rollout status deployment/web-deployment
+kubectl get deployment web-deployment -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
 ```
+![rollback](/dso202-practical-01/evidence/rollback-stage5.png)
 
 The image was restored to:
 
@@ -401,43 +420,31 @@ I deliberately changed the image to a nonexistent version:
 ```bash
 kubectl set image deployment/web-deployment web=nginx:9.99-does-not-exist
 kubectl rollout status deployment/web-deployment --timeout=60s
+kubectl get pods -l app=web
 ```
-
+![imagePullBackOff](/dso202-practical-01/evidence/failrollback-stage5.png)
 The new Pod entered `ImagePullBackOff`, while the existing healthy Pods remained available. I diagnosed the problem using Pod status and description, then recovered the application using:
 
 ```bash
+kubectl describe pod -l app=web | grep -A3 'Failed'
 kubectl rollout undo deployment/web-deployment
 kubectl rollout status deployment/web-deployment
+kubectl get pods -l app=web
 ```
+![recovered](/dso202-practical-01/evidence/recovered-stage5.png)
 
 Finally, I restored the manifest-defined state:
 
 ```bash
 kubectl apply -f manifests/03-deployment-web.yaml
-kubectl diff -f manifests/03-deployment-web.yaml
+kubectl diff -f manifests/03-deployment-web.yaml && echo "cluster matches manifest"
 ```
+![restored](/dso202-practical-01/evidence/restored-stage5.png)
 
 ### Observation
 
 This stage demonstrated the major advantage of Deployments over standalone Pods: self-healing, replica management, controlled updates and rollback. The failed rollout also showed the importance of a safe rollout strategy because the healthy replicas remained available while the invalid image failed to start.
 
-> **Screenshot Placeholder — Stage 5: Deployment and ReplicaSet**  
-> Insert the screenshot showing the Deployment, ReplicaSet and three Pods.
-
-> **Screenshot Placeholder — Stage 5: Self-Healing**  
-> Insert the screenshot showing the deleted Pod and its replacement.
-
-> **Screenshot Placeholder — Stage 5: Scaling**  
-> Insert the screenshot showing the Deployment scaled to five replicas.
-
-> **Screenshot Placeholder — Stage 5: Rolling Update**  
-> Insert the screenshot showing rollout status and the two ReplicaSets.
-
-> **Screenshot Placeholder — Stage 5: Rollback**  
-> Insert the screenshot showing `kubectl rollout history` and successful rollback.
-
-> **Screenshot Placeholder — Stage 5: Failed Rollout**  
-> Insert the screenshot showing `ImagePullBackOff` and the subsequent recovery.
 
 ## 3.7 Stage 6 — Services
 
