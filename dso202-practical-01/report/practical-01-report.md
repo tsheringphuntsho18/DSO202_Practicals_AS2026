@@ -466,6 +466,8 @@ kubectl get endpointslice -l kubernetes.io/service-name=web-clusterip
 
 The EndpointSlice contained the addresses of the ready web Pods.
 
+![clusterip](/dso202-practical-01/evidence/clusterIP-stage6.png)
+
 ### Internal DNS Test
 
 I created a client Pod and tested DNS resolution from inside the cluster:
@@ -476,6 +478,7 @@ kubectl wait --for=condition=Ready pod/client-pod --timeout=60s
 
 kubectl exec client-pod -- nslookup web-clusterip
 ```
+![intrnal](/dso202-practical-01/evidence/internal-stage6.png)
 
 The Service name resolved to the ClusterIP rather than directly to a Pod IP.
 
@@ -491,6 +494,7 @@ manifests/05-service-nodeport.yaml
 kubectl apply -f manifests/05-service-nodeport.yaml
 kubectl get service
 ```
+![nodePort](/dso202-practical-01/evidence/nodePort-stage6.png)
 
 The NodePort was configured to use port `30080`.
 
@@ -499,6 +503,7 @@ I tested the application from the host machine:
 ```bash
 curl -s http://localhost:30080
 ```
+![curlTested](/dso202-practical-01/evidence/crul-tested-stage6.png)
 
 Repeated requests returned responses from the Nginx Deployment Pods, demonstrating Service load balancing.
 
@@ -507,6 +512,7 @@ I also tested the NodePort from inside a worker-node container:
 ```bash
 docker exec dso202-worker curl -s http://localhost:30080
 ```
+![workernode](/dso202-practical-01/evidence/workernode-tested-stage6.png)
 
 ### LoadBalancer Behaviour
 
@@ -517,6 +523,7 @@ kubectl create service loadbalancer lb-demo --tcp=80:80
 kubectl get service lb-demo
 kubectl delete service lb-demo
 ```
+![loadbalncer](/dso202-practical-01/evidence/loadbalancer-stage6.png)
 
 The `EXTERNAL-IP` remained `<pending>` because a local kind cluster does not have a cloud-provider load balancer.
 
@@ -527,21 +534,6 @@ The Service exercises demonstrated the difference between ClusterIP and NodePort
 - **ClusterIP** provides stable internal access within the cluster.
 - **NodePort** exposes the Service through a port on every Kubernetes node.
 - A **LoadBalancer** Service requires an external provider and therefore remains pending in the local kind environment.
-
-> **Screenshot Placeholder — Stage 6: ClusterIP**  
-> Insert the screenshot showing the ClusterIP Service and EndpointSlice.
-
-> **Screenshot Placeholder — Stage 6: DNS**  
-> Insert the screenshot showing `nslookup web-clusterip` from `client-pod`.
-
-> **Screenshot Placeholder — Stage 6: NodePort**  
-> Insert the screenshot showing `kubectl get service` with the NodePort.
-
-> **Screenshot Placeholder — Stage 6: External Access**  
-> Insert the screenshot showing `curl http://localhost:30080` returning the Nginx response.
-
-> **Screenshot Placeholder — Stage 6: LoadBalancer**  
-> Insert the screenshot showing the temporary LoadBalancer Service with `<pending>`.
 
 ## 3.8 Stage 7 — Cleanup and Reproducibility
 
