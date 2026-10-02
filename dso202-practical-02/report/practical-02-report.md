@@ -287,13 +287,13 @@ kubectl patch pvc dynamic-data --type merge \
 ```
 ![uncomfortable](/dso202-practical-02/evidence/screenshots/uncomfortable.png)
 
-The rejection comes from the API server, not from the provisioner, and it is caused by allowVolumeExpansion: false on the class.
+The rejection comes from the API server, not from the provisioner and it is caused by allowVolumeExpansion: false on the class.
 
 **Delete dynamic resources**
 
 ![resources](/dso202-practical-02/evidence/screenshots/resources.png)
 
-The claim, the volume object and the directory on the node all disappeared, and the second command printed nothing.
+The claim, the volume object and the directory on the node all disappeared and the second command printed nothing.
 
 ### Observation
 
@@ -816,38 +816,14 @@ This prevents another workload from accidentally receiving another workload's ex
 
 ## 5.1 Difficult Part
 
-The most difficult part of the practical was:
-
-```text
-[WRITE YOUR ACTUAL DIFFICULTY HERE]
-
-Example:
-Understanding why the dynamically provisioned PVC remained Pending before
+The most difficult part of the practical was understanding why the dynamically provisioned PVC remained Pending before
 the writer Pod was created was initially confusing.
-```
 
 ## 5.2 Error Encountered
 
-The actual error encountered during the practical was:
+The actual error encountered during the practical was error from server (Forbidden) when attempting to increase the PVC size.
 
-```text
-[WRITE YOUR ACTUAL ERROR HERE]
-
-Example:
-Error from server (Forbidden) when attempting to increase the PVC size.
-```
-
-The command used to diagnose it was:
-
-```text
-[WRITE THE ACTUAL DIAGNOSTIC COMMAND HERE]
-```
-
-The cause was:
-
-```text
-[EXPLAIN THE ACTUAL CAUSE]
-```
+The cause was that the rejection comes from the API server, not from the provisioner and it is caused by allowVolumeExpansion: false on the class. The resize operation was rejected because volume expansion was disabled for the StorageClass.
 
 ## 5.3 What I Would Do Differently
 
@@ -857,30 +833,11 @@ I would also check the StorageClass configuration before troubleshooting a PVC b
 
 ## 5.4 One Remaining Unclear Point
 
-One aspect that remains unclear to me is:
-
-```text
-[WRITE ONE REAL QUESTION YOU STILL HAVE]
-
-Example:
-How the behaviour of the local-path provisioner differs internally from a
-CSI-based network storage provisioner when a Pod is rescheduled to another
-node.
-```
+One aspect that remains unclear to me is how the behaviour of the local-path provisioner differs internally from a CSI-based network storage provisioner when a Pod is rescheduled to another.
 
 # 6. References
 
-1. DSO202 Practical 2 Guide, *Persistent Storage and StatefulSets in Kubernetes*, HackMD. Accessed: 29 September 2026.
+1. DSO202 Practical 2 Guide.
 
-2. Kubernetes documentation consulted during the practical:
-
-```text
-[ADD ANY KUBERNETES DOCUMENTATION ACTUALLY CONSULTED]
-```
-
-3. kind documentation consulted during the practical:
-
-```text
-[ADD IF ACTUALLY CONSULTED]
-```
+2. DSO202 Practical 2 manifest file.
 
