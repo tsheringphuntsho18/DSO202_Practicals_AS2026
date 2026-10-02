@@ -443,36 +443,11 @@ The StatefulSet provided stable Pod identities and individual persistent volumes
 
 The Pods were created in ordinal order and each ordinal received its own PVC.
 
-## 3.6 Stage 6 — StatefulSet Persistence, Scaling and Rolling Update
-
-The `webnote-1` Pod was deleted:
-
-```bash
-kubectl delete pod webnote-1
-```
-
-It was then recreated automatically by the StatefulSet:
-
-```bash
-kubectl wait --for=condition=Ready pod/webnote-1 --timeout=120s
-```
-
-The Pod and its PVC were inspected:
-
-```bash
-kubectl get pod webnote-1 \
-  -o custom-columns='NAME:.metadata.name,NODE:.spec.nodeName,IP:.status.podIP'
-```
-
-```bash
-kubectl get pvc content-webnote-1
-```
-
-### Observation
-
 The Pod name remained `webnote-1`, the PVC remained associated with ordinal 1, and the Pod received a new IP address.
 
 The original `created:` timestamp remained in the stored file, demonstrating that the volume was reused rather than recreated.
+
+## 3.6 Stage 6 — Scaling, Retention and Rolling Update
 
 ### Scaling
 
@@ -481,6 +456,7 @@ The StatefulSet was scaled to four replicas:
 ```bash
 kubectl scale statefulset webnote --replicas=4
 ```
+![scaling](/dso202-practical-02/evidence/screenshots/scaling.png)
 
 The new PVC was verified.
 
@@ -497,6 +473,9 @@ The retained PVCs were then checked:
 ```bash
 kubectl get pvc -l app=webnote
 ```
+![scaled down](/dso202-practical-02/evidence/screenshots/scaleDown.png)
+
+We should still have four PVCs because the manifest uses retention behavior that preserves the claims when scaling down.
 
 ### Partitioned rollout
 
@@ -505,6 +484,7 @@ The StatefulSet manifest was changed so that:
 ```yaml
 partition: 2
 ```
+![partition](/dso202-practical-02/evidence/screenshots/partition.png)
 
 and the image was changed from:
 
@@ -517,36 +497,26 @@ to:
 ```yaml
 nginx:1.31-alpine
 ```
+![image](/dso202-practical-02/evidence/screenshots/image.png)
 
 After applying the manifest, only the Pod at ordinal 2 was updated.
+
+![after applying](/dso202-practical-02/evidence/screenshots/afterApplying.png)
 
 The partition was then changed back to:
 
 ```yaml
 partition: 0
 ```
-
 and the remaining Pods were updated.
 
-### Evidence
+![back](/dso202-practical-02/evidence/screenshots/rollBack.png)
 
-```text
-[COMMAND OUTPUT PLACEHOLDER — webnote-1 replacement]
-```
+All three should now use: `nginx:1.31-alpine`
 
-```text
-[COMMAND OUTPUT PLACEHOLDER — StatefulSet scaling]
-```
+**Deleted the controller and kept the data**
 
-```text
-[COMMAND OUTPUT PLACEHOLDER — Partitioned rollout]
-```
-
-### Screenshots
-
-> `[SCREENSHOT PLACEHOLDER — Stage 6 retained PVC and recreated Pod]`
-
-> `[SCREENSHOT PLACEHOLDER — Stage 6 partitioned rollout]`
+![data](/dso202-practical-02/evidence/screenshots/data.png)
 
 ## 3.7 Stage 7 — PostgreSQL StatefulSet
 
@@ -561,6 +531,7 @@ The PostgreSQL Services were created:
 ```bash
 kubectl apply -f manifests/13-service-postgres.yaml
 ```
+![services](/dso202-practical-02/evidence/screenshots/services.png)
 
 The PostgreSQL StatefulSet was deployed:
 
@@ -579,6 +550,7 @@ The PVC was checked:
 ```bash
 kubectl get pvc data-postgres-0
 ```
+![deployed](/dso202-practical-02/evidence/screenshots/deployed.png)
 
 The PostgreSQL storage used the `dso202-retain` StorageClass.
 
@@ -591,9 +563,11 @@ kubectl exec postgres-0 -- psql -U taskuser -d tasktracker -c \
 "CREATE TABLE tasks (
     id serial PRIMARY KEY,
     title text NOT NULL,
-    done boolean NOT NULL DEFAULT false
+    done boolean NOT NULL DEFAULT false,
+    created_at timestamptz NOT NULL DEFAULT now()
 );"
 ```
+![table](/dso202-practical-02/evidence/screenshots/createdTable.png)
 
 Three rows were inserted:
 
@@ -605,6 +579,7 @@ VALUES
 ('Read Unit II notes'),
 ('Draft the report');"
 ```
+![insert](/dso202-practical-02/evidence/screenshots/insert.png)
 
 The rows were verified:
 
@@ -612,6 +587,7 @@ The rows were verified:
 kubectl exec postgres-0 -- psql -U taskuser -d tasktracker -c \
 "SELECT id, title, done FROM tasks ORDER BY id;"
 ```
+![select](/dso202-practical-02/evidence/screenshots/select.png)
 
 ### Persistence test
 
@@ -633,30 +609,17 @@ The row count was then checked:
 kubectl exec postgres-0 -- psql -U taskuser -d tasktracker -c \
 "SELECT count(*) FROM tasks;"
 ```
+![persistence test](/dso202-practical-02/evidence/screenshots/persistenceTest.png)
 
 ### Observation
 
 The replacement PostgreSQL Pod returned a row count of:
 
 ```text
-[REPLACE WITH ACTUAL RESULT — expected 3]
+3
 ```
 
 This demonstrated that the database data remained available after the original PostgreSQL Pod was deleted.
-
-### Evidence
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — PostgreSQL three rows]
-```
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — PostgreSQL row count after Pod deletion]
-```
-
-### Screenshot
-
-> `[SCREENSHOT PLACEHOLDER — PostgreSQL row count = 3 after Pod deletion]`
 
 ## 3.8 Stage 8 — Cleanup and Reclaim Policies
 
