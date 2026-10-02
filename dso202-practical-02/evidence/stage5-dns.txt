@@ -1,0 +1,11 @@
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+
+Name:	webnote.dso202-practical-02.svc.cluster.local
+Address: 10.244.2.14
+Name:	webnote.dso202-practical-02.svc.cluster.local
+Address: 10.244.1.8
+Name:	webnote.dso202-practical-02.svc.cluster.local
+Address: 10.244.1.6
+

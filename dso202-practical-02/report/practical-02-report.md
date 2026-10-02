@@ -253,20 +253,23 @@ The PVC initially remained in the `Pending` state.
 The reason was examined using:
 
 ```bash
-kubectl describe pvc dynamic-data
+kubectl describe pvc dynamic-data | tail -n 6
 ```
+![dynamic](/dso202-practical-02/evidence/screenshots/dynamic.png)
 
 The events indicated:
 
 ```text
 WaitForFirstConsumer
 ```
+This claim is not broken. The standard class uses WaitForFirstConsumer, so the control plane refuses to choose storage until it knows which node the Pod will run on.
 
 A Pod was then created:
 
 ```bash
 kubectl apply -f manifests/07-pod-dynamic-writer.yaml
 ```
+![dynamic writer](/dso202-practical-02/evidence/screenshots/menifest7.png)
 
 After the Pod was ready, the PVC and PV were checked again.
 
@@ -282,6 +285,15 @@ Finally, an attempt was made to increase the PVC size:
 kubectl patch pvc dynamic-data --type merge \
   -p '{"spec":{"resources":{"requests":{"storage":"2Gi"}}}}'
 ```
+![uncomfortable](/dso202-practical-02/evidence/screenshots/uncomfortable.png)
+
+The rejection comes from the API server, not from the provisioner, and it is caused by allowVolumeExpansion: false on the class.
+
+**Delete dynamic resources**
+
+![resources](/dso202-practical-02/evidence/screenshots/resources.png)
+
+The claim, the volume object and the directory on the node all disappeared, and the second command printed nothing.
 
 ### Observation
 
@@ -289,25 +301,6 @@ The PVC remained Pending initially because the StorageClass used `WaitForFirstCo
 
 The resize operation was rejected because volume expansion was disabled for the StorageClass.
 
-### Evidence
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — PVC Pending and WaitForFirstConsumer]
-```
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — df -h /data]
-```
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — PVC resize rejection]
-```
-
-### Screenshots
-
-> `[SCREENSHOT PLACEHOLDER — Stage 3 Pending PVC]`
-
-> `[SCREENSHOT PLACEHOLDER — Stage 3 resize rejection]`
 
 ## 3.4 Stage 4 — Deployment with Shared PVC
 
@@ -329,16 +322,16 @@ The Pod placement was examined using:
 kubectl get pods -l app=shared-writer \
   -o custom-columns='NAME:.metadata.name,NODE:.spec.nodeName'
 ```
+![stage4](/dso202-practical-02/evidence/screenshots/stage4.png)
+
+### Observation 1 — Storage affected placement
 
 The shared log was inspected using:
 
 ```bash
 kubectl exec deploy/shared-writer -- cat /data/visitors.log
 ```
-
-The Pods were then deleted and allowed to be recreated.
-
-### Observation 1 — Storage affected placement
+![O1](/dso202-practical-02/evidence/screenshots/O1.png)
 
 All three replicas were scheduled onto the same node because the single RWO volume was local to one node.
 
@@ -348,33 +341,16 @@ All three replicas accessed the same storage and therefore wrote to the same fil
 
 This demonstrates why sharing one database data directory between multiple independent database processes is not an appropriate architecture.
 
+![O2](/dso202-practical-02/evidence/screenshots/O2.png)
+
+
 ### Observation 3 — Pod identity was not stable
 
 After the Deployment Pods were deleted, new Pod names were generated.
 
 The original Pod identities were not retained.
 
-### Evidence
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — Three shared-writer Pods and nodes]
-```
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — Shared visitors.log]
-```
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — New Pod names after deletion]
-```
-
-### Screenshots
-
-> `[SCREENSHOT PLACEHOLDER — Stage 4 all replicas on one node]`
-
-> `[SCREENSHOT PLACEHOLDER — Stage 4 shared log]`
-
-> `[SCREENSHOT PLACEHOLDER — Stage 4 regenerated Pod names]`
+![O3](/dso202-practical-02/evidence/screenshots/O3.png)
 
 ## 3.5 Stage 5 — StatefulSet and Stable Identity
 
@@ -383,6 +359,13 @@ A headless Service was created:
 ```bash
 kubectl apply -f manifests/09-service-webnote.yaml
 ```
+Check:
+```bash
+kubectl get service webnote
+```
+![webnote](/dso202-practical-02/evidence/screenshots/webnote.png)
+
+CLUSTER-IP reads None. No virtual address was allocated, and no load balancing will occur. The Service exists to publish DNS records. That means it is a headless Service.
 
 The StatefulSet was then created:
 
@@ -395,6 +378,7 @@ The Pods were monitored:
 ```bash
 kubectl get pods -l app=webnote -w
 ```
+![statefull](/dso202-practical-02/evidence/screenshots/statefull.png)
 
 The resulting Pods were named:
 
@@ -403,14 +387,22 @@ webnote-0
 webnote-1
 webnote-2
 ```
+The Pods are created in ordinal order.
 
 The PVCs were checked:
 
 ```bash
 kubectl get pvc -l app=webnote
 ```
+![Check PVCs](/dso202-practical-02/evidence/screenshots/checkPVC.png)
 
 Three individual PVCs were created, one for each StatefulSet ordinal.
+
+**Check Pod placement**
+
+![Check Pod Placement](/dso202-practical-02/evidence/screenshots/checkPodPlacement.png)
+
+The Pods are no longer required to share one volume. This confirm that placement is now free, because each Pod has its own volume.
 
 A client Pod was then created:
 
@@ -424,34 +416,32 @@ DNS was tested:
 kubectl exec client -- nslookup \
   webnote.dso202-practical-02.svc.cluster.local
 ```
+![pod client](/dso202-practical-02/evidence/screenshots/podclient.png)
 
 A specific Pod was accessed using its StatefulSet DNS name.
+
+**Prove the volumes are private**
+
+![private](/dso202-practical-02/evidence/screenshots/private.png)
+
+Three replicas of one workload, three different files.
+
+**Prove that identity and storage survive deletion**
+
+![storage survive deletion](/dso202-practical-02/evidence/screenshots/storageSurviveDeletion.png)
+
+Important observations:
+- webnote-1 kept the same name.
+- The PVC was not recreated.
+- The original created: timestamp remained.
+- The IP address changed.
+
 
 ### Observation
 
 The StatefulSet provided stable Pod identities and individual persistent volumes. The headless Service provided DNS records for the individual StatefulSet Pods.
 
 The Pods were created in ordinal order and each ordinal received its own PVC.
-
-### Evidence
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — StatefulSet ordered creation]
-```
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — Three StatefulSet PVCs]
-```
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — Headless Service nslookup]
-```
-
-### Screenshot
-
-> `[SCREENSHOT PLACEHOLDER — Stage 5 StatefulSet and PVCs]`
-
-> `[SCREENSHOT PLACEHOLDER — Stage 5 DNS resolution]`
 
 ## 3.6 Stage 6 — StatefulSet Persistence, Scaling and Rolling Update
 
