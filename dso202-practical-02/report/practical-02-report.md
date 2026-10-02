@@ -626,7 +626,10 @@ This demonstrated that the database data remained available after the original P
 Before cleanup, the final storage state was captured:
 
 ```bash
-kubectl get pv,pvc,storageclass -o wide
+kubectl get all -o wide > evidence/final-state-all.txt
+kubectl get pv,pvc,storageclass -o wide > evidence/final-state-storage.txt
+kubectl get statefulset webnote -o yaml > evidence/final-statefulset-webnote.yaml
+kubectl get events --sort-by=.lastTimestamp > evidence/final-state-events.txt
 ```
 
 A PostgreSQL dump was created:
@@ -638,6 +641,15 @@ kubectl exec postgres-0 -- \
 ```
 
 The workloads were deleted.
+
+```bash
+kubectl delete -f manifests/14-statefulset-postgres.yaml
+kubectl delete -f manifests/10-statefulset-webnote.yaml
+kubectl delete -f manifests/11-pod-client.yaml
+kubectl delete -f manifests/05-pod-static-writer.yaml
+kubectl get pods
+```
+![cleanup](/dso202-practical-02/evidence/screenshots/cleanup.png)
 
 The remaining PVCs were then inspected.
 
@@ -652,6 +664,9 @@ The PVs were checked again:
 ```bash
 kubectl get pv
 ```
+![explicitly deleted](/dso202-practical-02/evidence/screenshots/explicit.png)
+
+The important lesson is that deleting a StatefulSet does not automatically delete the PVCs created through its `volumeClaimTemplates`.
 
 ### Observation
 
@@ -667,24 +682,9 @@ The cluster was then deleted:
 kubectl config set-context --current --namespace=default
 kind delete cluster --name dso202-p2
 ```
+![cluster deleted](/dso202-practical-02/evidence/screenshots/clusterDeleted.png)
 
-The final host storage was checked before removing it.
-
-### Evidence
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — Final PV/PVC state]
-```
-
-```text
-[COMMAND OUTPUT PLACEHOLDER — kind cluster deleted]
-```
-
-### Screenshots
-
-> `[SCREENSHOT PLACEHOLDER — Stage 8 PV state after PVC deletion]`
-
-> `[SCREENSHOT PLACEHOLDER — Static host storage after cluster deletion]`
+The final host storage was checked before removing it. Note: floci is not a part of this practical.
 
 # 4. Analysis
 
