@@ -1,0 +1,72 @@
+.
+├── cluster
+│   └── kind-cluster.yaml
+├── evidence
+│   ├── all-environments.txt
+│   ├── base-rendered.yaml
+│   ├── cluster-info.txt
+│   ├── dev-configmaps-after.txt
+│   ├── dev-configmaps-before.txt
+│   ├── dev-deployment.txt
+│   ├── dev-pods-after.txt
+│   ├── dev-pods-before.txt
+│   ├── dev-prod-diff.txt
+│   ├── dev-rendered.yaml
+│   ├── nodes.txt
+│   ├── prod-rendered.yaml
+│   ├── qa-deployment.yaml
+│   ├── qa-rendered.yaml
+│   ├── repository-tree.txt
+│   └── screenshots
+│       ├── s10.png
+│       ├── s11.png
+│       ├── s12.png
+│       ├── s13.png
+│       ├── s14.png
+│       ├── s15.png
+│       ├── s16.png
+│       ├── s17.png
+│       ├── s18.png
+│       ├── s1.png
+│       ├── s2.png
+│       ├── s3.png
+│       ├── s4.png
+│       ├── s5a.png
+│       ├── s5b.png
+│       ├── s6a.png
+│       ├── s6b.png
+│       ├── s7.png
+│       ├── s8a.png
+│       ├── s8b.png
+│       └── s9.png
+├── examples
+│   └── webapp
+│       ├── base
+│       │   ├── deployment.yaml
+│       │   ├── index.html
+│       │   ├── kustomization.yaml
+│       │   └── service.yaml
+│       └── overlays
+│           ├── dev
+│           │   ├── index.html
+│           │   ├── kustomization.yaml
+│           │   └── namespace.yaml
+│           ├── prod
+│           │   ├── index.html
+│           │   ├── kustomization.yaml
+│           │   ├── namespace.yaml
+│           │   └── patch-resources.yaml
+│           ├── qa
+│           │   ├── index.html
+│           │   ├── kustomization.yaml
+│           │   ├── namespace.yaml
+│           │   └── patch-annotation.yaml
+│           └── staging
+│               ├── index.html
+│               ├── kustomization.yaml
+│               └── namespace.yaml
+├── README.md
+└── report
+    └── practical-05-report.md
+
+12 directories, 57 files

@@ -1,0 +1,2 @@
+NAME                      READY   STATUS    RESTARTS   AGE   IP            NODE            NOMINATED NODE   READINESS GATES
+webapp-66f4646499-wzpqg   1/1     Running   0          15m   10.244.1.11   worker-node-2   <none>           <none>

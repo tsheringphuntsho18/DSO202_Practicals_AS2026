@@ -1,0 +1,3 @@
+NAME                     DATA   AGE
+kube-root-ca.crt         1      15m
+web-content-42gc78f88t   1      15m
