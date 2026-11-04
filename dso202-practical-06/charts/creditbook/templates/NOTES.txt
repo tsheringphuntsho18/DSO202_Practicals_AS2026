@@ -1,0 +1,15 @@
+Credit Book release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Environment: {{ .Values.global.environment }}
+
+To access the frontend, run:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ .Release.Name }}-frontend 8080:80
+
+Then open:
+  http://localhost:8080
+
+Health endpoint:
+  http://localhost:8080/api/health
+
+Run the chart test:
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }} --logs

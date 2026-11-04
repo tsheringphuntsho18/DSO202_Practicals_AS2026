@@ -1,0 +1,24 @@
+apiVersion: v2
+name: creditbook
+description: Umbrella Helm chart for the DSO202 Credit Book three-tier application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+kubeVersion: ">=1.28.0-0"
+keywords:
+  - dso202
+  - helm
+  - creditbook
+  - postgres
+maintainers:
+  - name: DSO202 Student
+dependencies:
+  - name: frontend
+    version: 0.1.0
+    repository: file://charts-src/frontend
+  - name: backend
+    version: 0.1.0
+    repository: file://charts-src/backend
+  - name: database
+    version: 0.1.0
+    repository: file://charts-src/database

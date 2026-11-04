@@ -1,0 +1,9 @@
+{
+  "name": "creditbook-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Learning REST API for the DSO202 Helm practical",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "pg": "8.13.1" }
+}
